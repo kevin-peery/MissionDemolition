@@ -8,10 +8,14 @@ public class Slingshot : MonoBehaviour
     public GameObject projectilePrefab;
     public float velocityMult = 10f;
     public GameObject projLinePrefab;
+    public AudioClip pull,
+                     release;
 
     [Header("Dynamic")]
+    public bool allowInput = true;
     public GameObject launchPoint,
                       projectile;
+    Rubberband rubberBand;
     public Vector3 launchPos;
     public bool aimingMode;
 
@@ -21,11 +25,13 @@ public class Slingshot : MonoBehaviour
         launchPoint = launchPointTrans.gameObject;
         launchPoint.SetActive(false);
         launchPos = launchPointTrans.position;
+        rubberBand = GetComponentInChildren<Rubberband>();
     }
 
     void OnMouseEnter()
     {
-        launchPoint.SetActive(true);
+        if (allowInput)
+            launchPoint.SetActive(true);
     }
     void OnMouseExit()
     {
@@ -33,10 +39,15 @@ public class Slingshot : MonoBehaviour
     }
     void OnMouseDown()
     {
+        if (!allowInput)
+            return;
+
         aimingMode = true;
         projectile = Instantiate(projectilePrefab);
         projectile.transform.position = launchPos;
         projectile.GetComponent<Rigidbody>().isKinematic = true;
+
+        AudioSource.PlayClipAtPoint(pull, Camera.main.transform.position);
     }
     void Update()
     {
@@ -58,6 +69,8 @@ public class Slingshot : MonoBehaviour
         Vector3 projectilePos = launchPos + mouseDalta;
         projectile.transform.position = projectilePos;
 
+        rubberBand.DrawPull(mouseDalta);
+
         if (Input.GetMouseButtonUp(0))
         {
             aimingMode = false;
@@ -72,6 +85,9 @@ public class Slingshot : MonoBehaviour
             Instantiate<GameObject>(projLinePrefab, projectile.transform);
             projectile = null;
             MissionDemolition.SHOT_FIRED();
+
+            AudioSource.PlayClipAtPoint(release, Camera.main.transform.position);
+            rubberBand.DrawRest();
         }
     }
 }

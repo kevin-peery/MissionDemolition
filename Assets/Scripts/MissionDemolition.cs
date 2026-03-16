@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum GameMode
@@ -16,9 +17,11 @@ public class MissionDemolition : MonoBehaviour
 
     [Header("Inscribed")]
     public Text uitLevel,
-                uitShots;
+                uitShots,
+                uitMaxShots;
     public Vector3 castlePos;
     public GameObject[] castles;
+    public int maxShots;
 
     [Header("Dynamic")]
     public int level,
@@ -27,6 +30,7 @@ public class MissionDemolition : MonoBehaviour
     public GameObject castle;
     public GameMode mode = GameMode.idle;
     public string showing = "Show Slingshot";
+    public GameObject gameOver;
 
     // Start is called before the first frame update
     void Start()
@@ -36,6 +40,9 @@ public class MissionDemolition : MonoBehaviour
         level = 0;
         shotsTaken = 0;
         levelMax = castles.Length;
+
+        gameOver = GameObject.Find("GameOverScreen");
+        gameOver.SetActive(false);
 
         StartLevel();
     }
@@ -56,6 +63,7 @@ public class MissionDemolition : MonoBehaviour
 
         mode = GameMode.playing;
 
+
         FollowCam.SWITCH_VIEW(FollowCam.eView.both);
     }
 
@@ -63,6 +71,7 @@ public class MissionDemolition : MonoBehaviour
     {
         uitLevel.text = $"Level: {level + 1} of {levelMax}";
         uitShots.text = $"Shots taken: {shotsTaken}";
+        uitMaxShots.text = $"Max Shots: {maxShots}";
     }
 
     // Update is called once per frame
@@ -93,4 +102,17 @@ public class MissionDemolition : MonoBehaviour
 
     static public void SHOT_FIRED() => S.shotsTaken++;
     static public GameObject GET_CASTLE() => S.castle;
+    static public void GAME_OVER_CHECK()
+    {
+        if (S.shotsTaken >= S.maxShots)
+        {
+            Slingshot slingshot = GameObject.FindAnyObjectByType<Slingshot>();
+            slingshot.allowInput = false;
+            S.mode = GameMode.idle;
+
+            S.gameOver.SetActive(true);
+        }
+    }
+
+    static public void PLAY_AGAIN() => SceneManager.LoadScene("_Scene_0");
 }

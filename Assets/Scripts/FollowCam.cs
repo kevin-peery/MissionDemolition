@@ -38,7 +38,10 @@ public class FollowCam : MonoBehaviour
         {
             Rigidbody poiRigid = POI.GetComponent<Rigidbody>();
             if (poiRigid != null && poiRigid.IsSleeping())
+            {
                 POI = null;
+                MissionDemolition.GAME_OVER_CHECK();
+            }
         }
         if (POI != null)
             destination = POI.transform.position;
